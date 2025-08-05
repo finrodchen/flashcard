@@ -1,0 +1,22 @@
+name = "lightning-flashcard"
+main = "src/index.js"
+compatibility_date = "2023-12-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "flashcard-db"
+database_id = "your-database-id"
+
+# 本地開發數據庫
+[[d1_databases]]
+binding = "DB_LOCAL"
+database_name = "flashcard-db-local"
+database_id = "local-development-db"
+
+[vars]
+ENVIRONMENT = "production"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id"

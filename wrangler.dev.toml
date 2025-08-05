@@ -1,0 +1,15 @@
+name = "lightning-flashcard-dev"
+main = "src/index.js"
+compatibility_date = "2023-12-01"
+
+# 本地開發配置
+[env.development]
+
+# 使用本地SQLite數據庫進行開發
+[[d1_databases]]
+binding = "DB"
+database_name = "flashcard-db-local"
+database_id = "local-db"
+
+[vars]
+ENVIRONMENT = "development"

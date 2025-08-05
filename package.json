@@ -1,0 +1,32 @@
+{
+  "name": "lightning-flashcard",
+  "version": "1.0.0",
+  "description": "閃電字卡 - 一個部署在Cloudflare Worker上的快翻字卡應用",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev --local --persist-to=.wrangler/state",
+    "dev:remote": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute flashcard-db --file=./schema.sql",
+    "db:init:local": "wrangler d1 execute flashcard-db-local --local --file=./schema.sql",
+    "db:create": "wrangler d1 create flashcard-db",
+    "db:migrations:apply": "wrangler d1 migrations apply flashcard-db",
+    "preview": "wrangler dev --local",
+    "tail": "wrangler tail"
+  },
+  "keywords": [
+    "flashcard",
+    "learning",
+    "memory",
+    "cloudflare-worker",
+    "d1-database"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^4.28.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

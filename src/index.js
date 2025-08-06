@@ -482,7 +482,7 @@ function getIndexHTML() {
 <body>
     <div class="header">
         <h1>⚡ 閃電字卡</h1>
-        <p>Lightning Flashcard - 快速記憶，高效學習</p>
+        <p>Lightning Flashcard</p>
     </div>
 
     <div class="container">

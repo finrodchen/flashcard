@@ -293,13 +293,18 @@ function getIndexHTML() {
         }
 
         .flashcard-container {
-            perspective: 1000px;
+            perspective: 1200px;
             margin-bottom: 2rem;
+            min-height: 312px;
+            display: flex;
+            justify-content: center;
         }
 
         .flashcard {
-            width: 400px;
-            height: 250px;
+            min-width: 400px;
+            max-width: 1200px;
+            width: auto;
+            min-height: 312px;
             position: relative;
             transform-style: preserve-3d;
             transition: transform 0.6s;
@@ -313,17 +318,33 @@ function getIndexHTML() {
         .flashcard-face {
             position: absolute;
             width: 100%;
-            height: 100%;
+            min-height: 312px;
             backface-visibility: hidden;
-            border-radius: 15px;
+            border-radius: 19px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 2rem;
+            padding: 1rem;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 600;
+            white-space: pre-line;
+            box-sizing: border-box;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.3;
+            overflow: hidden;
+        }
+
+        .flashcard-face > div {
+            max-width: 100%;
+            max-height: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .flashcard-front {
@@ -385,51 +406,7 @@ function getIndexHTML() {
             margin-top: 0.25rem;
         }
 
-        .add-card-form {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 500px;
-            margin-top: 2rem;
-        }
 
-        .add-card-form h3 {
-            margin-bottom: 1.5rem;
-            color: #333;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #555;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
 
         .loading {
             text-align: center;
@@ -453,13 +430,17 @@ function getIndexHTML() {
             }
 
             .flashcard {
-                width: 320px;
-                height: 200px;
+                min-width: 300px;
+                max-width: 400px;
+                width: auto;
+                min-height: 250px;
             }
 
             .flashcard-face {
-                font-size: 1.2rem;
-                padding: 1.5rem;
+                font-size: 1rem;
+                padding: 0.8rem;
+                min-height: 250px;
+                line-height: 1.2;
             }
 
             .controls {
@@ -474,7 +455,7 @@ function getIndexHTML() {
             .actions {
                 flex-direction: column;
                 width: 100%;
-                max-width: 320px;
+                max-width: 400px;
             }
         }
     </style>
@@ -547,36 +528,7 @@ function getIndexHTML() {
         <div class="loading" id="loading" style="display: none;">載入中...</div>
         <div class="error" id="error" style="display: none;"></div>
 
-        <div class="add-card-form">
-            <h3>📝 新增字卡</h3>
-            <form id="addCardForm">
-                <div class="form-group">
-                    <label for="frontText">正面內容</label>
-                    <textarea id="frontText" placeholder="輸入問題或要記憶的內容" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="backText">背面內容</label>
-                    <textarea id="backText" placeholder="輸入答案或解釋" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="categoryInput">分類</label>
-                    <select id="categoryInput">
-                        <option value="general">general</option>
-                        <option value="custom">+ 新增分類</option>
-                    </select>
-                    <input type="text" id="customCategoryInput" placeholder="輸入新分類名稱" style="display: none; margin-top: 0.5rem;">
-                </div>
-                <div class="form-group">
-                    <label for="difficultyInput">難度</label>
-                    <select id="difficultyInput">
-                        <option value="1">簡單</option>
-                        <option value="2">中等</option>
-                        <option value="3">困難</option>
-                    </select>
-                </div>
-                <button type="submit">新增字卡</button>
-            </form>
-        </div>
+
     </div>
 
     <script>
@@ -595,23 +547,7 @@ function getIndexHTML() {
         });
 
         function setupEventListeners() {
-            document.getElementById('addCardForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                addNewCard();
-            });
-            
-            // 處理分類選擇變化
-            document.getElementById('categoryInput').addEventListener('change', function(e) {
-                const customInput = document.getElementById('customCategoryInput');
-                if (e.target.value === 'custom') {
-                    customInput.style.display = 'block';
-                    customInput.required = true;
-                } else {
-                    customInput.style.display = 'none';
-                    customInput.required = false;
-                    customInput.value = '';
-                }
-            });
+            // 移除新增字卡表單相關的事件監聽器
         }
 
         // 載入分類
@@ -631,24 +567,7 @@ function getIndexHTML() {
                     select.appendChild(option);
                 });
                 
-                // 更新新增字卡用的分類選單
-                const addSelect = document.getElementById('categoryInput');
-                addSelect.innerHTML = '<option value="general">general</option>';
-                
-                categories.forEach(cat => {
-                    if (cat.category !== 'general') {
-                        const option = document.createElement('option');
-                        option.value = cat.category;
-                        option.textContent = cat.category;
-                        addSelect.appendChild(option);
-                    }
-                });
-                
-                // 添加"新增分類"選項
-                const customOption = document.createElement('option');
-                customOption.value = 'custom';
-                customOption.textContent = '+ 新增分類';
-                addSelect.appendChild(customOption);
+
             } catch (error) {
                 console.error('載入分類失敗:', error);
             }
@@ -702,17 +621,52 @@ function getIndexHTML() {
             }
         }
 
+        // 調整字卡高度
+        function adjustCardHeight() {
+            const flashcard = document.getElementById('flashcard');
+            const container = document.querySelector('.flashcard-container');
+            const frontFace = document.getElementById('cardFront');
+            const backFace = document.getElementById('cardBack');
+            
+            // 暫時顯示當前面以測量高度
+            const currentFace = isFlipped ? backFace : frontFace;
+            const otherFace = isFlipped ? frontFace : backFace;
+            
+            // 測量內容高度
+            currentFace.style.position = 'relative';
+            currentFace.style.visibility = 'visible';
+            otherFace.style.position = 'absolute';
+            otherFace.style.visibility = 'hidden';
+            
+            const contentHeight = Math.max(currentFace.scrollHeight, 312);
+            
+            // 設置容器和字卡高度
+            container.style.height = contentHeight + 'px';
+            flashcard.style.height = contentHeight + 'px';
+            
+            // 恢復樣式
+            currentFace.style.position = 'absolute';
+            currentFace.style.visibility = 'visible';
+            otherFace.style.position = 'absolute';
+            otherFace.style.visibility = 'visible';
+        }
+
         // 顯示當前字卡
         function showCard() {
             if (flashcards.length === 0) return;
             
             const card = flashcards[currentIndex];
-            document.getElementById('cardFront').textContent = card.front;
-            document.getElementById('cardBack').textContent = card.back;
+            document.getElementById('cardFront').innerHTML = card.front;
+            document.getElementById('cardBack').innerHTML = card.back;
             
             // 重置翻轉狀態
             isFlipped = false;
             document.getElementById('flashcard').classList.remove('flipped');
+            
+            // 調整容器高度以適應內容
+            setTimeout(() => {
+                adjustCardHeight();
+            }, 50);
         }
 
         // 翻轉字卡
@@ -725,6 +679,11 @@ function getIndexHTML() {
             } else {
                 flashcard.classList.remove('flipped');
             }
+            
+            // 翻轉後調整高度
+            setTimeout(() => {
+                adjustCardHeight();
+            }, 300); // 等待翻轉動畫完成
         }
 
         // 標記答案
@@ -788,72 +747,7 @@ function getIndexHTML() {
             document.getElementById('incorrectCount').textContent = stats.incorrect;
         }
 
-        // 新增字卡
-        async function addNewCard() {
-            const front = document.getElementById('frontText').value.trim();
-            const back = document.getElementById('backText').value.trim();
-            const categorySelect = document.getElementById('categoryInput').value;
-            const customCategory = document.getElementById('customCategoryInput').value.trim();
-            const difficulty = parseInt(document.getElementById('difficultyInput').value);
-            
-            // 決定使用的分類
-            let category;
-            if (categorySelect === 'custom') {
-                if (!customCategory) {
-                    showError('請輸入新分類名稱');
-                    return;
-                }
-                category = customCategory;
-            } else {
-                category = categorySelect || 'general';
-            }
-            
-            if (!front || !back) {
-                showError('請填寫正面和背面內容');
-                return;
-            }
-            
-            showLoading(true);
-            hideError();
-            
-            try {
-                const response = await fetch('/api/flashcards', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        front,
-                        back,
-                        category,
-                        difficulty
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    // 清空表單
-                    document.getElementById('addCardForm').reset();
-                    document.getElementById('categoryInput').value = 'general';
-                    document.getElementById('customCategoryInput').style.display = 'none';
-                    document.getElementById('customCategoryInput').required = false;
-                    document.getElementById('customCategoryInput').value = '';
-                    
-                    // 重新載入分類
-                    await loadCategories();
-                    
-                    alert('字卡新增成功！');
-                } else {
-                    showError(result.message || '新增字卡失敗');
-                }
-                
-            } catch (error) {
-                showError('新增字卡失敗: ' + error.message);
-            } finally {
-                showLoading(false);
-            }
-        }
+
 
         // 顯示載入狀態
         function showLoading(show) {

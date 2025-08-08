@@ -397,6 +397,22 @@ function getIndexHTML() {
             color: #333;
         }
 
+        .browse-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-prev {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-flip {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
         .stats {
             background: rgba(255, 255, 255, 0.95);
             padding: 1.5rem;
@@ -438,6 +454,11 @@ function getIndexHTML() {
         #practiceModeName.incorrect-mode {
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
             animation: pulse 2s infinite;
+        }
+
+        #practiceModeName.browse-mode {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
         }
 
         @keyframes pulse {
@@ -528,6 +549,7 @@ function getIndexHTML() {
                 <select id="practiceMode">
                     <option value="all">所有字卡</option>
                     <option value="incorrect">錯題練習</option>
+                    <option value="browse">瀏覽字卡</option>
                 </select>
             </div>
             <div class="control-group">
@@ -560,7 +582,7 @@ function getIndexHTML() {
         </div>
 
         <div class="flashcard-container" id="flashcardContainer" style="display: none;">
-            <div class="flashcard" id="flashcard" onclick="flipCard()">
+            <div class="flashcard" id="flashcard" onclick="handleCardClick()">
                 <div class="flashcard-face flashcard-front" id="cardFront">
                     點擊載入字卡開始學習
                 </div>
@@ -573,6 +595,12 @@ function getIndexHTML() {
         <div class="actions" id="actions" style="display: none;">
             <button class="btn-correct" onclick="markAnswer(true)">✓ 答對了</button>
             <button class="btn-incorrect" onclick="markAnswer(false)">✗ 答錯了</button>
+            <button class="btn-next" onclick="nextCard()">下一張 →</button>
+        </div>
+
+        <div class="browse-actions" id="browseActions" style="display: none;">
+            <button class="btn-prev" onclick="prevCard()">← 上一張</button>
+            <button class="btn-flip" onclick="flipCard()">翻轉字卡</button>
             <button class="btn-next" onclick="nextCard()">下一張 →</button>
         </div>
 
@@ -665,23 +693,40 @@ function getIndexHTML() {
                 stats.incorrect = 0;
                 
                 // 更新練習模式指示器
-                const practiceModeName = practiceMode === 'incorrect' ? '錯題練習' : '一般練習';
+                let practiceModeName;
+                if (practiceMode === 'incorrect') {
+                    practiceModeName = '錯題練習';
+                } else if (practiceMode === 'browse') {
+                    practiceModeName = '瀏覽字卡';
+                } else {
+                    practiceModeName = '一般練習';
+                }
+                
                 const practiceModeElement = document.getElementById('practiceModeName');
                 practiceModeElement.textContent = practiceModeName;
                 
                 // 添加或移除CSS類名
+                practiceModeElement.classList.remove('incorrect-mode', 'browse-mode');
                 if (practiceMode === 'incorrect') {
                     practiceModeElement.classList.add('incorrect-mode');
-                } else {
-                    practiceModeElement.classList.remove('incorrect-mode');
+                } else if (practiceMode === 'browse') {
+                    practiceModeElement.classList.add('browse-mode');
                 }
                 
                 showCard();
                 updateStats();
                 
                 document.getElementById('flashcardContainer').style.display = 'block';
-                document.getElementById('actions').style.display = 'flex';
                 document.getElementById('stats').style.display = 'grid';
+                
+                // 根據練習模式顯示不同的操作按鈕
+                if (practiceMode === 'browse') {
+                    document.getElementById('actions').style.display = 'none';
+                    document.getElementById('browseActions').style.display = 'flex';
+                } else {
+                    document.getElementById('actions').style.display = 'flex';
+                    document.getElementById('browseActions').style.display = 'none';
+                }
                 
             } catch (error) {
                 showError('載入字卡失敗: ' + error.message);
@@ -738,6 +783,16 @@ function getIndexHTML() {
             }, 50);
         }
 
+        // 處理字卡點擊事件
+        function handleCardClick() {
+            const practiceMode = document.getElementById('practiceMode').value;
+            
+            // 在瀏覽模式下，點擊字卡不會翻轉，需要使用翻轉按鈕
+            if (practiceMode !== 'browse') {
+                flipCard();
+            }
+        }
+
         // 翻轉字卡
         function flipCard() {
             const flashcard = document.getElementById('flashcard');
@@ -787,6 +842,27 @@ function getIndexHTML() {
         }
 
         // 下一張字卡
+        function prevCard() {
+            if (flashcards.length === 0) return;
+            
+            // 如果當前卡片已翻轉，先翻回正面
+            if (isFlipped) {
+                flipCard(); // 翻回正面
+                
+                // 等待翻轉動畫完成後再切換到上一張
+                setTimeout(() => {
+                    currentIndex = (currentIndex - 1 + flashcards.length) % flashcards.length;
+                    showCard();
+                    updateStats();
+                }, 600); // 600ms 對應 CSS 中的翻轉動畫時間
+            } else {
+                // 如果沒有翻轉，直接切換到上一張
+                currentIndex = (currentIndex - 1 + flashcards.length) % flashcards.length;
+                showCard();
+                updateStats();
+            }
+        }
+
         function nextCard() {
             if (flashcards.length === 0) return;
             

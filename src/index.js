@@ -71,26 +71,46 @@ function getDB(env) {
 async function getFlashcards(env, searchParams) {
   const category = searchParams.get('category');
   const difficulty = searchParams.get('difficulty');
+  const practiceMode = searchParams.get('practiceMode');
   const limit = parseInt(searchParams.get('limit')) || 10;
   const random = searchParams.get('random') === 'true';
+  const userId = searchParams.get('userId') || 'anonymous';
 
-  let query = 'SELECT * FROM flashcards WHERE 1=1';
-  const params = [];
+  let query, params = [];
+
+  if (practiceMode === 'incorrect') {
+    // 錯題練習模式：只顯示答錯的字卡
+    query = `SELECT f.* FROM flashcards f 
+             INNER JOIN user_progress up ON f.id = up.flashcard_id 
+             WHERE up.user_id = ? AND up.last_result = -1`;
+    params.push(userId);
+  } else {
+    // 一般模式：顯示所有字卡
+    query = 'SELECT * FROM flashcards WHERE 1=1';
+  }
 
   if (category && category !== 'all') {
-    query += ' AND category = ?';
+    if (practiceMode === 'incorrect') {
+      query += ' AND f.category = ?';
+    } else {
+      query += ' AND category = ?';
+    }
     params.push(category);
   }
 
   if (difficulty) {
-    query += ' AND difficulty = ?';
+    if (practiceMode === 'incorrect') {
+      query += ' AND f.difficulty = ?';
+    } else {
+      query += ' AND difficulty = ?';
+    }
     params.push(parseInt(difficulty));
   }
 
   if (random) {
     query += ' ORDER BY RANDOM()';
   } else {
-    query += ' ORDER BY created_at DESC';
+    query += practiceMode === 'incorrect' ? ' ORDER BY f.created_at DESC' : ' ORDER BY created_at DESC';
   }
 
   query += ' LIMIT ?';
@@ -406,6 +426,26 @@ function getIndexHTML() {
             margin-top: 0.25rem;
         }
 
+        #practiceModeName {
+            font-size: 1.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        #practiceModeName.incorrect-mode {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
 
 
         .loading {
@@ -484,12 +524,23 @@ function getIndexHTML() {
                 </select>
             </div>
             <div class="control-group">
+                <label for="practiceMode">練習模式</label>
+                <select id="practiceMode">
+                    <option value="all">所有字卡</option>
+                    <option value="incorrect">錯題練習</option>
+                </select>
+            </div>
+            <div class="control-group">
                 <label>&nbsp;</label>
                 <button onclick="loadFlashcards()">載入字卡</button>
             </div>
         </div>
 
         <div class="stats" id="stats" style="display: none;">
+            <div class="stat-item">
+                <div class="stat-value" id="practiceModeName">一般練習</div>
+                <div class="stat-label">練習模式</div>
+            </div>
             <div class="stat-item">
                 <div class="stat-value" id="totalCards">0</div>
                 <div class="stat-label">總字卡數</div>
@@ -577,6 +628,7 @@ function getIndexHTML() {
         async function loadFlashcards() {
             const category = document.getElementById('categorySelect').value;
             const difficulty = document.getElementById('difficultySelect').value;
+            const practiceMode = document.getElementById('practiceMode').value;
             
             showLoading(true);
             hideError();
@@ -595,17 +647,34 @@ function getIndexHTML() {
                     params.append('difficulty', difficulty);
                 }
                 
+                if (practiceMode) {
+                    params.append('practiceMode', practiceMode);
+                }
+                
                 const response = await fetch(\`/api/flashcards?\${params}\`);
                 flashcards = await response.json();
                 
                 if (flashcards.length === 0) {
-                    showError('沒有找到符合條件的字卡');
+                    const message = practiceMode === 'incorrect' ? '沒有找到錯題，恭喜你！' : '沒有找到符合條件的字卡';
+                    showError(message);
                     return;
                 }
                 
                 currentIndex = 0;
                 stats.correct = 0;
                 stats.incorrect = 0;
+                
+                // 更新練習模式指示器
+                const practiceModeName = practiceMode === 'incorrect' ? '錯題練習' : '一般練習';
+                const practiceModeElement = document.getElementById('practiceModeName');
+                practiceModeElement.textContent = practiceModeName;
+                
+                // 添加或移除CSS類名
+                if (practiceMode === 'incorrect') {
+                    practiceModeElement.classList.add('incorrect-mode');
+                } else {
+                    practiceModeElement.classList.remove('incorrect-mode');
+                }
                 
                 showCard();
                 updateStats();
